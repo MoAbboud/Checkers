@@ -3,5 +3,5 @@ module Checkers {
 	requires javafx.graphics;
 	requires javafx.fxml;
 	
-	opens application_Sprint1 to javafx.graphics, javafx.fxml;
+	opens application_Sprint1_prod to javafx.graphics, javafx.fxml;
 }
