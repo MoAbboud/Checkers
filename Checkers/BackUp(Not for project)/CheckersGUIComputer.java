@@ -73,13 +73,13 @@ public class CheckersGUIComputer {
 		CheckGameOver(false);
 		for (Node piece : CheckersBoard.getChildren()) {
 			if (piece instanceof Ellipse) {
-				//Traverse all the pieces and look for the ones that belong to the current turn
+
 				if (piece.getId().contains("black")) {
-					//only select black pieces that belong to the human player
+
 					piece.setOnMouseClicked(new EventHandler<MouseEvent>() {
 						@Override
 						public void handle(MouseEvent event) {
-							//Create the onClick listener
+
 							if (piece.getBoundsInParent().contains(event.getSceneX(), event.getSceneY())) {
 
 								int fromRow = CheckRowIndex(piece);
@@ -87,8 +87,6 @@ public class CheckersGUIComputer {
 
 								System.out.println("Piece at " + fromRow + "-" + fromCol);
 								System.out.println(board.getCell(fromRow, fromCol));
-								//After getting the coordinates of the pressed button, DisplayPossibleMoves will
-								//will store the potential possible moves for that piece.
 								int[] possibleMoves = DisplayPossibleMoves(fromRow, fromCol, board.getTurn(),
 										piece.getId());
 								int row1, col1, row2, col2, row3, col3, row4, col4;
@@ -121,49 +119,43 @@ public class CheckersGUIComputer {
 									System.out.println("Possible move: " + row3 + "-" + col3);
 									System.out.println("Possible move: " + row4 + "-" + col4);
 								}
+								// GameState();
 
 								for (Node Tile : CheckersBoard.getChildren()) {
 									if (Tile instanceof Rectangle) {
-										//Traverse the checkers board squares
+
 										Tile.setOnMouseClicked(new EventHandler<MouseEvent>() {
 											@Override
 											public void handle(MouseEvent event) {
-												//Creating the onClick listener.
+
 												if (Tile.getBoundsInParent().contains(event.getSceneX(),
 														event.getSceneY())) {
 
 													int toRow = CheckRowIndex(Tile);
 													int toCol = CheckColIndex(Tile);
-													
-													//If the coordinates of the square belong to the possible moves array
-													//the square will contain the listener and can be clicked
+
 													if (row1 == toRow && col1 == toCol || row2 == toRow && col2 == toCol
 															|| row3 == toRow && col3 == toCol
 															|| row4 == toRow && col4 == toCol) {
 
 														System.out.println("Tile at " + toRow + "-" + toCol);
 														System.out.println(board.getCell(toRow, toCol));
-														// Make move when clicked on the corresponding square
+														// Make Move
 														DoMove(fromRow, fromCol, toRow, toCol, piece);
-														//if the move is an overtake we perform an overtake
 														if (overtakeFlag) {
 															overtakeFlag = false;
 															PerfomOvertake(fromRow, fromCol, toRow, toCol, piece);
+
 														}
-														//After the overtake check if there is a possible jump move
 														CheckJumpMove(toRow, toCol, board.getTurn(), piece.getId());
 														board.printBoard();
 														GridPane.setRowIndex(piece, toRow);
 														GridPane.setColumnIndex(piece, toCol);
-														
-														//if jumpMovesFlag is true, remove listeners from only the squares
-														//so that the player can select the piece again and continue
-														//jumping.
+
 														if (jumpMovesFlag) {
 															RemoveListeners('R');
 															System.out.println("You have to keep jumping");
 														} else {
-															//Change the shape of the piece if king piece
 															if (kingPieceTrigger) {
 																((Ellipse) piece).setStroke(Color.RED);
 																((Ellipse) piece).setStrokeType(StrokeType.INSIDE);
@@ -171,7 +163,6 @@ public class CheckersGUIComputer {
 																piece.setId(board.getTurn().toLowerCase() + "King");
 																kingPieceTrigger = false;
 															}
-															//Remove listeners from both pieces and squares
 															RemoveListeners('B');
 															System.out.println(board.getTurn());
 															board.CheckGameState();
@@ -180,7 +171,6 @@ public class CheckersGUIComputer {
 															if (board.getGameState() == GameState.PLAYING) {
 																lblState.setText("Game is underway!");
 																changedTurns = false;
-																//Switch to turn so that the computer can play a move
 																UpdateGameComputer();
 															} else {
 																if (board.getGameState() == GameState.BLACK_WON) {
@@ -209,10 +199,10 @@ public class CheckersGUIComputer {
 
 	private void UpdateGameComputer() {
 
-		CheckGameOver(true); //check game over for computer player
+		CheckGameOver(true);
 		ArrayList<Piece> overtakeMoves = new ArrayList<Piece>();
 		for (int i = 0; i < computerMoves.size(); i++) {
-			// Checking if there is a possible capture move
+			// Checking if there is a possible capture move, if not move any piece.
 			int[] computerPossibleMoves = computerMoves.get(i).getPossibleMoves();
 			Node pieceNode = computerMoves.get(i).getNode();
 
@@ -220,8 +210,6 @@ public class CheckersGUIComputer {
 			int secondMoveCheck = 0;
 			int thirdMoveCheck = 0;
 			int fourthMoveCheck = 0;
-			
-			//Checking if the difference of rows is equal to 2 which means it is a possible overtake move
 			if (computerPossibleMoves[0] != -1) {
 				firstMoveCheck = Math.abs(computerPossibleMoves[0] - computerMoves.get(i).getRow());
 			}
@@ -236,24 +224,19 @@ public class CheckersGUIComputer {
 					fourthMoveCheck = Math.abs(computerPossibleMoves[6] - computerMoves.get(i).getRow());
 				}
 			}
-			
-			//if overtake move found, store the piece object in overtakeMoves array list.
 			if (firstMoveCheck == 2 || secondMoveCheck == 2 || thirdMoveCheck == 2 || fourthMoveCheck == 2) {
 				overtakeMoves.add(computerMoves.get(i));
 			}
 		}
 
-		//if overtakeMoves contains an object we prioritize the overtakeMoves
 		if (overtakeMoves.size() > 0) {
 			int toRow = 0;
 			int toCol = 0;
-			//get the first overtakeMoves object
 			Node piece = overtakeMoves.get(0).getNode();
 			int fromRow = overtakeMoves.get(0).getRow();
 			int fromCol = overtakeMoves.get(0).getCol();
 			int[] computerPossibleMoves = overtakeMoves.get(0).getPossibleMoves();
 
-			// the piece will have a few possible moves, we will select the one that is a valid and not -1 
 			for (int i = 0; i < computerPossibleMoves.length; i += 2) {
 				if (computerPossibleMoves[i] != -1 && computerPossibleMoves[i + 1] != -1) {
 					if (Math.abs(fromRow - computerPossibleMoves[i]) == 2) {
@@ -263,12 +246,9 @@ public class CheckersGUIComputer {
 				}
 			}
 
-			//Move the piece on the board
 			GridPane.setRowIndex(piece, toRow);
 			GridPane.setColumnIndex(piece, toCol);
-			//Perform the move
 			DoMove(fromRow, fromCol, toRow, toCol, piece);
-			//Check overtakeFlag to perform the overtake
 			if (overtakeFlag) {
 				overtakeFlag = false;
 				PerfomOvertake(fromRow, fromCol, toRow, toCol, piece);
@@ -277,14 +257,11 @@ public class CheckersGUIComputer {
 			if (jumpMovesFlag) {
 				System.out.println("You have to keep jumping");
 				board.printBoard();
-				//if a jumpMove is found we will repeat this method to start over until there are no more jump moves.
 				UpdateGameComputer();
 			}
-			//check if the game will end after this move
 			CheckComputerPieceOutcome(piece);
 
 		} else if (computerMoves.size() > 0) {
-			//if there are no overtake moves, select any move at random for the computer to play
 			Random r = new Random();
 			int randomInt = r.nextInt(computerMoves.size() - 0) + 0;
 
@@ -293,7 +270,7 @@ public class CheckersGUIComputer {
 			int fromCol = computerMoves.get(randomInt).getCol();
 			int[] computerPossibleMoves = computerMoves.get(randomInt).getPossibleMoves();
 
-			// checking all possible move for a normal piece
+			// CHECK ALL KING MOVES
 
 			if (computerPossibleMoves[0] != -1 && computerPossibleMoves[1] != -1) {
 				GridPane.setRowIndex(piece, computerPossibleMoves[0]);
@@ -303,9 +280,7 @@ public class CheckersGUIComputer {
 				GridPane.setRowIndex(piece, computerPossibleMoves[2]);
 				GridPane.setColumnIndex(piece, computerPossibleMoves[3]);
 				DoMove(fromRow, fromCol, computerPossibleMoves[2], computerPossibleMoves[3], piece);
-				
-			} else if (computerPossibleMoves.length > 4) { //Check all possible moves if the piece is a king piece
-				
+			} else if (computerPossibleMoves.length > 4) {
 				if (computerPossibleMoves[4] != -1 && computerPossibleMoves[5] != -1) {
 					GridPane.setRowIndex(piece, computerPossibleMoves[4]);
 					GridPane.setColumnIndex(piece, computerPossibleMoves[5]);
@@ -316,13 +291,11 @@ public class CheckersGUIComputer {
 					DoMove(fromRow, fromCol, computerPossibleMoves[6], computerPossibleMoves[7], piece);
 				}
 			}
-			//check if the game will end after this move
 			CheckComputerPieceOutcome(piece);
 		}
 	}
 
 	private void CheckComputerPieceOutcome(Node piece) {
-		//Check if king piece to change the shape of the piece
 		if (kingPieceTrigger) {
 			((Ellipse) piece).setStroke(Color.RED);
 			((Ellipse) piece).setStrokeType(StrokeType.INSIDE);
@@ -339,7 +312,6 @@ public class CheckersGUIComputer {
 
 		if (board.getGameState() == GameState.PLAYING) {
 			lblState.setText("Game is underway!");
-			//Switch the turn to allow the human to play a move.
 			UpdateGamePlayer();
 		} else {
 			if (board.getGameState() == GameState.BLACK_WON) {
@@ -352,8 +324,7 @@ public class CheckersGUIComputer {
 	}
 
 	private void DoMove(int fromRow, int fromCol, int toRow, int toCol, Node piece) {
-		//If the piece that is performing the move is moving 2 rows above or below, it means that it is an overtake move
-		//whereas if the piece moves 1 row above or below it is a a normal move
+
 		board.makeMove(fromRow, fromCol, toRow, toCol, board.getTurn());
 		int rowDif = fromRow - toRow;
 		rowDif = Math.abs(rowDif);
@@ -363,7 +334,6 @@ public class CheckersGUIComputer {
 			overtakeFlag = true;
 		}
 
-		//if the piece reaches the end of the board whether it is black or white, kingPieceTrigger will be true
 		if (toRow == 0 && board.getTurn().equals("Black") || toRow == 7 && board.getTurn().equals("White")) {
 			kingPieceTrigger = true;
 		}
@@ -378,15 +348,11 @@ public class CheckersGUIComputer {
 
 		if (!piece.getId().contains("King")) {
 			if (board.getTurn().equals("Black")) {
-				//Store the location of the piece that will be removed, one row above fromRow
 				piecetoRemoverow = fromRow - 1;
 			} else if (board.getTurn().equals("White")) {
-				//Store the location of the piece that will be removed, one row below fromRow
 				piecetoRemoverow = fromRow + 1;
 			}
 		} else {
-			//checking if the overtake move is going from the top to the bottom or the opposite to determine
-			//the position of the piece that will be captured
 			if (fromRow < toRow) {
 				piecetoRemoverow = fromRow + 1;
 			} else {
@@ -394,8 +360,6 @@ public class CheckersGUIComputer {
 			}
 		}
 		piecetoRemoveCol = 0;
-		//Checking if the overtake move is going left to right or the opposite to determine the column position
-		//of the piece that will be captured.
 		if (fromCol > toCol) {
 			piecetoRemoveCol = fromCol - 1;
 		} else {
@@ -403,7 +367,6 @@ public class CheckersGUIComputer {
 		}
 		System.out.println("piecetoRemoverow: " + piecetoRemoverow + " piecetoRemoveCol: " + piecetoRemoveCol);
 
-		//We have the coordinates of the piece we want to remove so we traverse all the pieces on the board to remove it
 		for (Node piecetoRemove : CheckersBoard.getChildren()) {
 			if (piecetoRemove instanceof Ellipse) {
 				int rowForRemoval = 0;
@@ -422,7 +385,6 @@ public class CheckersGUIComputer {
 				if (rowForRemoval == piecetoRemoverow && colForRemoval == piecetoRemoveCol) {
 
 					System.out.println("rowForRemoval: " + rowForRemoval + " colForRemoval: " + colForRemoval);
-					//Removing the piece
 					CheckersBoard.getChildren().remove(piecetoRemove);
 					if (board.getTurn().equals("Black")) {
 						board.whitePieces--;
@@ -454,12 +416,11 @@ public class CheckersGUIComputer {
 
 			possibleMovesMethod = new int[8];
 
-			if (board.getCell(fromRow - 1, fromCol + 1) == 0) { // Check one row above and a column to the right
+			if (board.getCell(fromRow - 1, fromCol + 1) == 0) { // Check Right
 				System.out.println("You can move top right");
 				possibleMovesMethod[0] = fromRow - 1;
 				possibleMovesMethod[1] = fromCol + 1;
 
-				// Check one row above and a column to the right and if the space 2 rows above and 2 columns to the right is empty
 			} else if (board.getCell(fromRow - 1, fromCol + 1) == pieceNumber
 					&& board.getCell(fromRow - 2, fromCol + 2) == 0) {
 				System.out.println("You can overtake top right");
@@ -471,12 +432,11 @@ public class CheckersGUIComputer {
 				possibleMovesMethod[1] = -1;
 			}
 
-			if (board.getCell(fromRow - 1, fromCol - 1) == 0) { // Check one row above and a column to the left
+			if (board.getCell(fromRow - 1, fromCol - 1) == 0) { // Check Left
 				System.out.println("You can move top left");
 				possibleMovesMethod[2] = fromRow - 1;
 				possibleMovesMethod[3] = fromCol - 1;
 
-			// Check one row above and a column to the left and if the space 2 rows above and 2 columns to the left is empty
 			} else if (board.getCell(fromRow - 1, fromCol - 1) == pieceNumber
 					&& board.getCell(fromRow - 2, fromCol - 2) == 0) {
 				System.out.println("You can overtake top left");
@@ -488,12 +448,11 @@ public class CheckersGUIComputer {
 				possibleMovesMethod[3] = -1;
 			}
 
-			if (board.getCell(fromRow + 1, fromCol + 1) == 0) { // Check one row below and a column to the right
+			if (board.getCell(fromRow + 1, fromCol + 1) == 0) { // Check Right
 				System.out.println("You can move bottom right");
 				possibleMovesMethod[4] = fromRow + 1;
 				possibleMovesMethod[5] = fromCol + 1;
 
-			// Check one row below and a column to the right and if the space 2 rows below and 2 columns to the right is empty
 			} else if (board.getCell(fromRow + 1, fromCol + 1) == pieceNumber
 					&& board.getCell(fromRow + 2, fromCol + 2) == 0) {
 				System.out.println("You can overtake bottom right");
@@ -505,13 +464,12 @@ public class CheckersGUIComputer {
 				possibleMovesMethod[5] = -1;
 			}
 
-			if (board.getCell(fromRow + 1, fromCol - 1) == 0) { // Check one row below and a column to the left
+			if (board.getCell(fromRow + 1, fromCol - 1) == 0) { // Check Left
 				System.out.println("You can move bottom left");
 
 				possibleMovesMethod[6] = fromRow + 1;
 				possibleMovesMethod[7] = fromCol - 1;
-			
-			// Check one row below and a column to the left and if the space 2 rows below and 2 columns to the left is empty
+
 			} else if (board.getCell(fromRow + 1, fromCol - 1) == pieceNumber
 					&& board.getCell(fromRow + 2, fromCol - 2) == 0) {
 				System.out.println("You can overtake bottom left");
@@ -527,12 +485,11 @@ public class CheckersGUIComputer {
 			possibleMovesMethod = new int[4];
 			if (turn.equals("Black")) {
 
-				if (board.getCell(fromRow - 1, fromCol + 1) == 0) { // Check one row above and a column to the right
+				if (board.getCell(fromRow - 1, fromCol + 1) == 0) { // Check Right
 					System.out.println("You can move right");
 					possibleMovesMethod[0] = fromRow - 1;
 					possibleMovesMethod[1] = fromCol + 1;
 
-				// Check one row above and a column to the right and if the space 2 rows above and 2 columns to the right is empty
 				} else if (board.getCell(fromRow - 1, fromCol + 1) == 2
 						&& board.getCell(fromRow - 2, fromCol + 2) == 0) {
 					System.out.println("You can overtake right");
@@ -544,12 +501,11 @@ public class CheckersGUIComputer {
 					possibleMovesMethod[1] = -1;
 				}
 
-				if (board.getCell(fromRow - 1, fromCol - 1) == 0) { // Check one row above and a column to the left
+				if (board.getCell(fromRow - 1, fromCol - 1) == 0) { // Check Left
 					System.out.println("You can move left");
 					possibleMovesMethod[2] = fromRow - 1;
 					possibleMovesMethod[3] = fromCol - 1;
 
-				// Check one row above and a column to the left and if the space 2 rows above and 2 columns to the left is empty
 				} else if (board.getCell(fromRow - 1, fromCol - 1) == 2
 						&& board.getCell(fromRow - 2, fromCol - 2) == 0) {
 					System.out.println("You can overtake left");
@@ -563,12 +519,11 @@ public class CheckersGUIComputer {
 
 			} else if (turn.equals("White")) {
 
-				if (board.getCell(fromRow + 1, fromCol + 1) == 0) { // Check one row below and a column to the right
+				if (board.getCell(fromRow + 1, fromCol + 1) == 0) { // Check Right
 					System.out.println("You can move right");
 					possibleMovesMethod[0] = fromRow + 1;
 					possibleMovesMethod[1] = fromCol + 1;
 
-				// Check one row below and a column to the right and if the space 2 rows below and 2 columns to the right is empty
 				} else if (board.getCell(fromRow + 1, fromCol + 1) == 1
 						&& board.getCell(fromRow + 2, fromCol + 2) == 0) {
 					System.out.println("You can overtake right");
@@ -580,13 +535,12 @@ public class CheckersGUIComputer {
 					possibleMovesMethod[1] = -1;
 				}
 
-				if (board.getCell(fromRow + 1, fromCol - 1) == 0) { // Check one row below and a column to the left
+				if (board.getCell(fromRow + 1, fromCol - 1) == 0) { // Check Left
 					System.out.println("You can move left");
 
 					possibleMovesMethod[2] = fromRow + 1;
 					possibleMovesMethod[3] = fromCol - 1;
 
-				// Check one row below and a column to the left and if the space 2 rows below and 2 columns to the left is empty
 				} else if (board.getCell(fromRow + 1, fromCol - 1) == 1
 						&& board.getCell(fromRow + 2, fromCol - 2) == 0) {
 					System.out.println("You can overtake left");
@@ -604,14 +558,14 @@ public class CheckersGUIComputer {
 
 	private void CheckJumpMove(int row, int column, String turn, String id) {
 
+		// jumpMoves = DisplayPossibleMoves(row, column, turn, id);
 		jumpMoves = new int[8];
 		boolean isKing = false;
 		boolean blackPiece = false;
 		boolean whitePiece = false;
 
-		int pieceNumber = 0; //opponent piece number will be stored here
+		int pieceNumber = 0;
 
-		//if it is Black pieces turn then the piece's we are going to set the white piece number as the opponent
 		if (turn.equals("Black")) {
 			blackPiece = true;
 			pieceNumber = 2;
@@ -623,10 +577,7 @@ public class CheckersGUIComputer {
 		if (id.contains("King")) {
 			isKing = true;
 		}
-		
-		//if it is a black piece we check if the space in the row above and to the right contains a white piece
-		//then we check if the 2 rows above and 2 spaces to the right are empty
-		//In case it is a king piece we check for the same condition.
+
 		if (board.getCell(row - 1, column + 1) == pieceNumber && board.getCell(row - 2, column + 2) == 0 && blackPiece
 				|| board.getCell(row - 1, column + 1) == pieceNumber && board.getCell(row - 2, column + 2) == 0
 						&& isKing) {
@@ -637,9 +588,6 @@ public class CheckersGUIComputer {
 			jumpMoves[1] = -1;
 		}
 
-		//if it is a black piece we check if the space in the row above and to the left contains a white piece
-		//then we check if the 2 rows above and 2 spaces to the left are empty
-		//In case it is a king piece we check for the same condition.
 		if (board.getCell(row - 1, column - 1) == pieceNumber && board.getCell(row - 2, column - 2) == 0 && blackPiece
 				|| board.getCell(row - 1, column - 1) == pieceNumber && board.getCell(row - 2, column - 2) == 0
 						&& isKing) {
@@ -650,9 +598,6 @@ public class CheckersGUIComputer {
 			jumpMoves[3] = -1;
 		}
 
-		//if it is a white piece we check if the space in the row above and to the right contains a black piece
-		//then we check if the 2 rows above and 2 spaces to the right are empty
-		//In case it is a king piece we check for the same condition.
 		if (board.getCell(row + 1, column + 1) == pieceNumber && board.getCell(row + 2, column + 2) == 0 && whitePiece
 				|| board.getCell(row + 1, column + 1) == pieceNumber && board.getCell(row + 2, column + 2) == 0
 						&& isKing) {
@@ -663,9 +608,6 @@ public class CheckersGUIComputer {
 			jumpMoves[5] = -1;
 		}
 
-		//if it is a white piece we check if the space in the row above and to the left contains a black piece
-		//then we check if the 2 rows above and 2 spaces to the left are empty
-		//In case it is a king piece we check for the same condition.
 		if (board.getCell(row + 1, column - 1) == pieceNumber && board.getCell(row + 2, column - 2) == 0 && whitePiece
 				|| board.getCell(row + 1, column - 1) == pieceNumber && board.getCell(row + 2, column - 2) == 0
 						&& isKing) {
@@ -676,7 +618,6 @@ public class CheckersGUIComputer {
 			jumpMoves[7] = -1;
 		}
 
-		//if all the jumpMoves array contains only the value -1 then there are no jumpMoves.
 		if (jumpMoves[0] == -1 && jumpMoves[1] == -1 && jumpMoves[2] == -1 && jumpMoves[3] == -1 && jumpMoves[4] == -1
 				&& jumpMoves[5] == -1 && jumpMoves[6] == -1 && jumpMoves[7] == -1 || jumpMoves == null) {
 			jumpMovesFlag = false;
@@ -693,13 +634,13 @@ public class CheckersGUIComputer {
 
 	private void RemoveListeners(char choice) {
 
-		if (choice == 'R') {//Removing all listeners from the board squares
+		if (choice == 'R') {
 			for (Node piece : CheckersBoard.getChildren()) {
 				if (piece instanceof Rectangle) {
 					piece.setOnMouseClicked(null);
 				}
 			}
-		} else { //Removing all listeners from the both board squares and pieces
+		} else {
 			for (Node piece : CheckersBoard.getChildren()) {
 				if (piece instanceof Ellipse || piece instanceof Rectangle) {
 					piece.setOnMouseClicked(null);
@@ -709,29 +650,23 @@ public class CheckersGUIComputer {
 	}
 
 	private void GameState(boolean isComputer) {
-		board.CheckGameState(); //Checking game state if there is a winner
+		board.CheckGameState();
 		boolean isDraw = true;
 		computerMoves = new ArrayList<Piece>();
 		if (board.getGameState() == GameState.PLAYING) {
 			for (Node piece : CheckersBoard.getChildren()) {
-				if (piece instanceof Ellipse) { //Traversing each piece on the board that belongs to the current turn player.
+				if (piece instanceof Ellipse) {
 					if (piece.getId().contains(board.getTurn().toLowerCase())) {
 
 						int fromRow = CheckRowIndex(piece);
 						int fromCol = CheckColIndex(piece);
 
-						//Finding all the possible moves of this piece
 						int[] possibleMoves = DisplayPossibleMoves(fromRow, fromCol, board.getTurn(), piece.getId());
 						boolean addtoList = true;
-						//Traversing along the possible moves, if one of them is not -1 then it is not a draw
 						for (int i = 0; i < possibleMoves.length; i++) {
 							if (possibleMoves[i] != -1) {
 								isDraw = false;
-								//Store the possible moves in the form of a Piece object in a computerMoves array list.
 								if (isComputer && addtoList) {
-									//if it is the computer's turn only enter the if statement
-									//since the for loop will traverse twice, we used the boolean to make sure that
-									//the piece is only added once.
 									addtoList = false;
 									computerMoves.add(new Piece(piece, fromRow, fromCol, possibleMoves));
 								}

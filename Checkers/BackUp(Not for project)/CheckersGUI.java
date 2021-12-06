@@ -44,6 +44,8 @@ public class CheckersGUI {
 	@FXML
 	private Ellipse white;
 
+	int row = 0;
+	int column = 0;
 	int[] possibleMoves;
 	int[] jumpMoves;
 	boolean jumpMovesFlag = false;
@@ -68,22 +70,29 @@ public class CheckersGUI {
 		CheckGameOver();
 		for (Node piece : CheckersBoard.getChildren()) {
 			if (piece instanceof Ellipse) {
-				//Traverse all the pieces and look for the ones that belong to the current turn
+
 				if (piece.getId().contains(board.getTurn().toLowerCase())) {
-					//Create a listener for the pieces
+
 					piece.setOnMouseClicked(new EventHandler<MouseEvent>() {
 						@Override
 						public void handle(MouseEvent event) {
 
 							if (piece.getBoundsInParent().contains(event.getSceneX(), event.getSceneY())) {
 
-								int fromRow = CheckRowIndex(piece);
-								int fromCol = CheckColIndex(piece);
-								
-								System.out.println("Piece at " + fromRow + "-" + fromCol);
-								System.out.println(board.getCell(fromRow, fromCol));
-								//After getting the coordinates of the pressed button, DisplayPossibleMoves will
-								//will store the potential possible moves for that piece.
+								if (GridPane.getRowIndex(piece) == null) {
+									row = 0;
+								} else {
+									row = GridPane.getRowIndex(piece);
+								}
+								if (GridPane.getColumnIndex(piece) == null) {
+									column = 0;
+								} else {
+									column = GridPane.getColumnIndex(piece);
+								}
+								int fromRow = row;
+								int fromCol = column;
+								System.out.println("Piece at " + row + "-" + column);
+								System.out.println(board.getCell(row, column));
 								int[] possibleMoves = DisplayPossibleMoves(fromRow, fromCol, board.getTurn(),
 										piece.getId());
 								int row1, col1, row2, col2, row3, col3, row4, col4;
@@ -116,49 +125,53 @@ public class CheckersGUI {
 									System.out.println("Possible move: " + row3 + "-" + col3);
 									System.out.println("Possible move: " + row4 + "-" + col4);
 								}
+								// GameState();
 
 								for (Node Tile : CheckersBoard.getChildren()) {
 									if (Tile instanceof Rectangle) {
-										//Traverse the checkers board squares
+
 										Tile.setOnMouseClicked(new EventHandler<MouseEvent>() {
 											@Override
 											public void handle(MouseEvent event) {
-												//Creating the onClick listener.
+
 												if (Tile.getBoundsInParent().contains(event.getSceneX(),
 														event.getSceneY())) {
 
-													int toRow = CheckRowIndex(Tile);
-													int toCol = CheckColIndex(Tile);
-													
-													//If the coordinates of the square belong to the possible moves array
-													//the square will contain the listener and can be clicked
+													if (GridPane.getRowIndex(Tile) == null) {
+														row = 0;
+													} else {
+														row = GridPane.getRowIndex(Tile);
+													}
+													if (GridPane.getColumnIndex(Tile) == null) {
+														column = 0;
+													} else {
+														column = GridPane.getColumnIndex(Tile);
+													}
+													int toRow = row;
+													int toCol = column;
+
 													if (row1 == toRow && col1 == toCol || row2 == toRow && col2 == toCol
 															|| row3 == toRow && col3 == toCol
 															|| row4 == toRow && col4 == toCol) {
 
-														System.out.println("Tile at " + toRow + "-" + toCol);
-														System.out.println(board.getCell(toRow, toCol));
-														// Make move when clicked on the corresponding square
+														System.out.println("Tile at " + row + "-" + column);
+														System.out.println(board.getCell(row, column));
+														// Make Move
 														DoMove(fromRow, fromCol, toRow, toCol, piece);
-														//if the move is an overtake we perform an overtake
 														if (overtakeFlag) {
 															overtakeFlag = false;
 															PerfomOvertake(fromRow, fromCol, toRow, toCol, piece);
+
 														}
-														//After the overtake check if there is a possible jump move
-														CheckJumpMove(toRow, toCol, board.getTurn(), piece.getId());
+														CheckJumpMove(row, column, board.getTurn(), piece.getId());
 														board.printBoard();
 														GridPane.setRowIndex(piece, toRow);
 														GridPane.setColumnIndex(piece, toCol);
 
-														//if jumpMovesFlag is true, remove listeners from only the squares
-														//so that the player can select the piece again and continue
-														//jumping.
 														if (jumpMovesFlag) {
 															RemoveListeners('R');
 															System.out.println("You have to keep jumping");
 														} else {
-															//Change the shape of the piece if king piece
 															if (kingPieceTrigger) {
 																((Ellipse) piece).setStroke(Color.RED);
 																((Ellipse) piece).setStrokeType(StrokeType.INSIDE);
@@ -166,7 +179,6 @@ public class CheckersGUI {
 																piece.setId(board.getTurn().toLowerCase() + "King");
 																kingPieceTrigger = false;
 															}
-															//Remove listeners from both pieces and squares
 															RemoveListeners('B');
 															System.out.println(board.getTurn());
 															board.CheckGameState();
@@ -174,8 +186,6 @@ public class CheckersGUI {
 															System.out.println(board.getGameState().toString());
 															if (board.getGameState() == GameState.PLAYING) {
 																lblState.setText("Game is underway!");
-																//restart this method but with the turn change to activate the
-																//other player's pieces.
 																UpdateGame();
 															} else {
 																if (board.getGameState() == GameState.BLACK_WON) {
@@ -204,8 +214,6 @@ public class CheckersGUI {
 
 	private void DoMove(int fromRow, int fromCol, int toRow, int toCol, Node piece) {
 
-		//If the piece that is performing the move is moving 2 rows above or below, it means that it is an overtake move
-		//whereas if the piece moves 1 row above or below it is a a normal move
 		board.makeMove(fromRow, fromCol, toRow, toCol, board.getTurn());
 		int rowDif = fromRow - toRow;
 		rowDif = Math.abs(rowDif);
@@ -215,7 +223,6 @@ public class CheckersGUI {
 			overtakeFlag = true;
 		}
 
-		//if the piece reaches the end of the board whether it is black or white, kingPieceTrigger will be true
 		if (toRow == 0 && board.getTurn().equals("Black") || toRow == 7 && board.getTurn().equals("White")) {
 			kingPieceTrigger = true;
 		}
@@ -230,15 +237,11 @@ public class CheckersGUI {
 
 		if (!piece.getId().contains("King")) {
 			if (board.getTurn().equals("Black")) {
-				//Store the location of the piece that will be removed, one row above fromRow
 				piecetoRemoverow = fromRow - 1;
 			} else if (board.getTurn().equals("White")) {
-				//Store the location of the piece that will be removed, one row below fromRow
 				piecetoRemoverow = fromRow + 1;
 			}
 		} else {
-			//checking if the overtake move is going from the top to the bottom or the opposite to determine
-			//the position of the piece that will be captured
 			if (fromRow < toRow) {
 				piecetoRemoverow = fromRow + 1;
 			} else {
@@ -246,8 +249,6 @@ public class CheckersGUI {
 			}
 		}
 		piecetoRemoveCol = 0;
-		//Checking if the overtake move is going left to right or the opposite to determine the column position
-		//of the piece that will be captured.
 		if (fromCol > toCol) {
 			piecetoRemoveCol = fromCol - 1;
 		} else {
@@ -255,7 +256,6 @@ public class CheckersGUI {
 		}
 		System.out.println("piecetoRemoverow: " + piecetoRemoverow + " piecetoRemoveCol: " + piecetoRemoveCol);
 
-		//We have the coordinates of the piece we want to remove so we traverse all the pieces on the board to remove it
 		for (Node piecetoRemove : CheckersBoard.getChildren()) {
 			if (piecetoRemove instanceof Ellipse) {
 				int rowForRemoval = 0;
@@ -274,7 +274,6 @@ public class CheckersGUI {
 				if (rowForRemoval == piecetoRemoverow && colForRemoval == piecetoRemoveCol) {
 
 					System.out.println("rowForRemoval: " + rowForRemoval + " colForRemoval: " + colForRemoval);
-					//Removing the piece
 					CheckersBoard.getChildren().remove(piecetoRemove);
 					if (board.getTurn().equals("Black")) {
 						board.whitePieces--;
@@ -306,13 +305,12 @@ public class CheckersGUI {
 
 			possibleMovesMethod = new int[8];
 
-			if (board.getCell(fromRow - 1, fromCol + 1) == 0) { // Check one row above and a column to the right
+			if (board.getCell(row - 1, column + 1) == 0) { // Check Right
 				System.out.println("You can move top right");
 				possibleMovesMethod[0] = fromRow - 1;
 				possibleMovesMethod[1] = fromCol + 1;
 
-			// Check one row above and a column to the right and if the space 2 rows above and 2 columns to the right is empty
-			} else if (board.getCell(fromRow - 1, fromCol + 1) == pieceNumber && board.getCell(fromRow - 2, fromCol + 2) == 0) {
+			} else if (board.getCell(row - 1, column + 1) == pieceNumber && board.getCell(row - 2, column + 2) == 0) {
 				System.out.println("You can overtake top right");
 				possibleMovesMethod[0] = fromRow - 2;
 				possibleMovesMethod[1] = fromCol + 2;
@@ -322,13 +320,12 @@ public class CheckersGUI {
 				possibleMovesMethod[1] = -1;
 			}
 
-			if (board.getCell(fromRow - 1, fromCol - 1) == 0) { // Check one row above and a column to the left
+			if (board.getCell(row - 1, column - 1) == 0) { // Check Left
 				System.out.println("You can move top left");
 				possibleMovesMethod[2] = fromRow - 1;
 				possibleMovesMethod[3] = fromCol - 1;
-				
-			// Check one row above and a column to the left and if the space 2 rows above and 2 columns to the left is empty
-			} else if (board.getCell(fromRow - 1, fromCol - 1) == pieceNumber && board.getCell(fromRow - 2, fromCol - 2) == 0) {
+
+			} else if (board.getCell(row - 1, column - 1) == pieceNumber && board.getCell(row - 2, column - 2) == 0) {
 				System.out.println("You can overtake top left");
 				possibleMovesMethod[2] = fromRow - 2;
 				possibleMovesMethod[3] = fromCol - 2;
@@ -338,13 +335,12 @@ public class CheckersGUI {
 				possibleMovesMethod[3] = -1;
 			}
 
-			if (board.getCell(fromRow + 1, fromCol + 1) == 0) { // Check one row below and a column to the right
+			if (board.getCell(row + 1, column + 1) == 0) { // Check Right
 				System.out.println("You can move bottom right");
 				possibleMovesMethod[4] = fromRow + 1;
 				possibleMovesMethod[5] = fromCol + 1;
 
-			// Check one row below and a column to the right and if the space 2 rows below and 2 columns to the right is empty
-			} else if (board.getCell(fromRow + 1, fromCol + 1) == pieceNumber && board.getCell(fromRow + 2, fromCol + 2) == 0) {
+			} else if (board.getCell(row + 1, column + 1) == pieceNumber && board.getCell(row + 2, column + 2) == 0) {
 				System.out.println("You can overtake bottom right");
 				possibleMovesMethod[4] = fromRow + 2;
 				possibleMovesMethod[5] = fromCol + 2;
@@ -354,14 +350,13 @@ public class CheckersGUI {
 				possibleMovesMethod[5] = -1;
 			}
 
-			if (board.getCell(fromRow + 1, fromCol - 1) == 0) { // Check one row below and a column to the left
+			if (board.getCell(row + 1, column - 1) == 0) { // Check Left
 				System.out.println("You can move bottom left");
 
 				possibleMovesMethod[6] = fromRow + 1;
 				possibleMovesMethod[7] = fromCol - 1;
-				
-			// Check one row below and a column to the left and if the space 2 rows below and 2 columns to the left is empty
-			} else if (board.getCell(fromRow + 1, fromCol - 1) == pieceNumber && board.getCell(fromRow + 2, fromCol - 2) == 0) {
+
+			} else if (board.getCell(row + 1, column - 1) == pieceNumber && board.getCell(row + 2, column - 2) == 0) {
 				System.out.println("You can overtake bottom left");
 				possibleMovesMethod[6] = fromRow + 2;
 				possibleMovesMethod[7] = fromCol - 2;
@@ -375,13 +370,12 @@ public class CheckersGUI {
 			possibleMovesMethod = new int[4];
 			if (turn.equals("Black")) {
 
-				if (board.getCell(fromRow - 1, fromCol + 1) == 0) { // Check one row above and a column to the right
+				if (board.getCell(row - 1, column + 1) == 0) { // Check Right
 					System.out.println("You can move right");
 					possibleMovesMethod[0] = fromRow - 1;
 					possibleMovesMethod[1] = fromCol + 1;
-					
-				// Check one row above and a column to the right and if the space 2 rows above and 2 columns to the right is empty
-				} else if (board.getCell(fromRow - 1, fromCol + 1) == 2 && board.getCell(fromRow - 2, fromCol + 2) == 0) {
+
+				} else if (board.getCell(row - 1, column + 1) == 2 && board.getCell(row - 2, column + 2) == 0) {
 					System.out.println("You can overtake right");
 					possibleMovesMethod[0] = fromRow - 2;
 					possibleMovesMethod[1] = fromCol + 2;
@@ -391,13 +385,12 @@ public class CheckersGUI {
 					possibleMovesMethod[1] = -1;
 				}
 
-				if (board.getCell(fromRow - 1, fromCol - 1) == 0) { // Check one row above and a column to the left
+				if (board.getCell(row - 1, column - 1) == 0) { // Check Left
 					System.out.println("You can move left");
 					possibleMovesMethod[2] = fromRow - 1;
 					possibleMovesMethod[3] = fromCol - 1;
 
-				// Check one row above and a column to the left and if the space 2 rows above and 2 columns to the left is empty
-				} else if (board.getCell(fromRow - 1, fromCol - 1) == 2 && board.getCell(fromRow - 2, fromCol - 2) == 0) {
+				} else if (board.getCell(row - 1, column - 1) == 2 && board.getCell(row - 2, column - 2) == 0) {
 					System.out.println("You can overtake left");
 					possibleMovesMethod[2] = fromRow - 2;
 					possibleMovesMethod[3] = fromCol - 2;
@@ -409,13 +402,12 @@ public class CheckersGUI {
 
 			} else if (turn.equals("White")) {
 
-				if (board.getCell(fromRow + 1, fromCol + 1) == 0) { // Check one row below and a column to the right
+				if (board.getCell(row + 1, column + 1) == 0) { // Check Right
 					System.out.println("You can move right");
 					possibleMovesMethod[0] = fromRow + 1;
 					possibleMovesMethod[1] = fromCol + 1;
 
-				// Check one row below and a column to the right and if the space 2 rows below and 2 columns to the right is empty
-				} else if (board.getCell(fromRow + 1, fromCol + 1) == 1 && board.getCell(fromRow + 2, fromCol + 2) == 0) {
+				} else if (board.getCell(row + 1, column + 1) == 1 && board.getCell(row + 2, column + 2) == 0) {
 					System.out.println("You can overtake right");
 					possibleMovesMethod[0] = fromRow + 2;
 					possibleMovesMethod[1] = fromCol + 2;
@@ -425,14 +417,13 @@ public class CheckersGUI {
 					possibleMovesMethod[1] = -1;
 				}
 
-				if (board.getCell(fromRow + 1, fromCol - 1) == 0) { // Check one row below and a column to the left
+				if (board.getCell(row + 1, column - 1) == 0) { // Check Left
 					System.out.println("You can move left");
 
 					possibleMovesMethod[2] = fromRow + 1;
 					possibleMovesMethod[3] = fromCol - 1;
-					
-				// Check one row below and a column to the left and if the space 2 rows below and 2 columns to the left is empty
-				} else if (board.getCell(fromRow + 1, fromCol - 1) == 1 && board.getCell(fromRow + 2, fromCol - 2) == 0) {
+
+				} else if (board.getCell(row + 1, column - 1) == 1 && board.getCell(row + 2, column - 2) == 0) {
 					System.out.println("You can overtake left");
 					possibleMovesMethod[2] = fromRow + 2;
 					possibleMovesMethod[3] = fromCol - 2;
@@ -448,14 +439,14 @@ public class CheckersGUI {
 
 	private void CheckJumpMove(int row, int column, String turn, String id) {
 
+		// jumpMoves = DisplayPossibleMoves(row, column, turn, id);
 		jumpMoves = new int[8];
 		boolean isKing = false;
 		boolean blackPiece = false;
 		boolean whitePiece = false;
 
-		int pieceNumber = 0; //opponent piece number will be stored here
+		int pieceNumber = 0;
 
-		//if it is Black pieces turn then the piece's we are going to set the white piece number as the opponent
 		if (turn.equals("Black")) {
 			blackPiece = true;
 			pieceNumber = 2;
@@ -468,9 +459,6 @@ public class CheckersGUI {
 			isKing = true;
 		}
 
-		//if it is a black piece we check if the space in the row above and to the right contains a white piece
-		//then we check if the 2 rows above and 2 spaces to the right are empty
-		//In case it is a king piece we check for the same condition.
 		if (board.getCell(row - 1, column + 1) == pieceNumber && board.getCell(row - 2, column + 2) == 0 && blackPiece
 				|| board.getCell(row - 1, column + 1) == pieceNumber && board.getCell(row - 2, column + 2) == 0
 						&& isKing) {
@@ -481,9 +469,6 @@ public class CheckersGUI {
 			jumpMoves[1] = -1;
 		}
 
-		//if it is a black piece we check if the space in the row above and to the left contains a white piece
-		//then we check if the 2 rows above and 2 spaces to the left are empty
-		//In case it is a king piece we check for the same condition.
 		if (board.getCell(row - 1, column - 1) == pieceNumber && board.getCell(row - 2, column - 2) == 0 && blackPiece
 				|| board.getCell(row - 1, column - 1) == pieceNumber && board.getCell(row - 2, column - 2) == 0
 						&& isKing) {
@@ -494,9 +479,6 @@ public class CheckersGUI {
 			jumpMoves[3] = -1;
 		}
 
-		//if it is a white piece we check if the space in the row above and to the right contains a black piece
-		//then we check if the 2 rows above and 2 spaces to the right are empty
-		//In case it is a king piece we check for the same condition.
 		if (board.getCell(row + 1, column + 1) == pieceNumber && board.getCell(row + 2, column + 2) == 0 && whitePiece
 				|| board.getCell(row + 1, column + 1) == pieceNumber && board.getCell(row + 2, column + 2) == 0
 						&& isKing) {
@@ -507,9 +489,6 @@ public class CheckersGUI {
 			jumpMoves[5] = -1;
 		}
 
-		//if it is a white piece we check if the space in the row above and to the left contains a black piece
-		//then we check if the 2 rows above and 2 spaces to the left are empty
-		//In case it is a king piece we check for the same condition.
 		if (board.getCell(row + 1, column - 1) == pieceNumber && board.getCell(row + 2, column - 2) == 0 && whitePiece
 				|| board.getCell(row + 1, column - 1) == pieceNumber && board.getCell(row + 2, column - 2) == 0
 						&& isKing) {
@@ -520,7 +499,6 @@ public class CheckersGUI {
 			jumpMoves[7] = -1;
 		}
 
-		//if all the jumpMoves array contains only the value -1 then there are no jumpMoves.
 		if (jumpMoves[0] == -1 && jumpMoves[1] == -1 && jumpMoves[2] == -1 && jumpMoves[3] == -1 && jumpMoves[4] == -1
 				&& jumpMoves[5] == -1 && jumpMoves[6] == -1 && jumpMoves[7] == -1 || jumpMoves == null) {
 			jumpMovesFlag = false;
@@ -537,13 +515,13 @@ public class CheckersGUI {
 
 	private void RemoveListeners(char choice) {
 
-		if (choice == 'R') { //Removing all listeners from the board squares
+		if (choice == 'R') {
 			for (Node piece : CheckersBoard.getChildren()) {
 				if (piece instanceof Rectangle) {
 					piece.setOnMouseClicked(null);
 				}
 			}
-		} else {  //Removing all listeners from the both board squares and pieces
+		} else {
 			for (Node piece : CheckersBoard.getChildren()) {
 				if (piece instanceof Ellipse || piece instanceof Rectangle) {
 					piece.setOnMouseClicked(null);
@@ -553,20 +531,28 @@ public class CheckersGUI {
 	}
 
 	private void GameState() {
-		board.CheckGameState(); //Checking game state if there is a winner
+		board.CheckGameState();
 		boolean isDraw = true;
 		if (board.getGameState() == GameState.PLAYING) {
 			for (Node piece : CheckersBoard.getChildren()) {
-				if (piece instanceof Ellipse) {  //Traversing each piece on the board that belongs to the current turn player.
-					if (piece.getId().contains(board.getTurn().toLowerCase())) { 
-						
-						int fromRow = CheckRowIndex(piece);
-						int fromCol = CheckColIndex(piece);
-
-						//Finding all the possible moves of this piece
+				if (piece instanceof Ellipse) {
+					if (piece.getId().contains(board.getTurn().toLowerCase())) {
+						if (GridPane.getRowIndex(piece) == null) {
+							row = 0;
+						} else {
+							row = GridPane.getRowIndex(piece);
+						}
+						if (GridPane.getColumnIndex(piece) == null) {
+							column = 0;
+						} else {
+							column = GridPane.getColumnIndex(piece);
+						}
+						int fromRow = row;
+						int fromCol = column;
+						//System.out.println("Piece at " + row + "-" + column);
+						//System.out.println(board.getCell(row, column));
 						int[] possibleMoves = DisplayPossibleMoves(fromRow, fromCol, board.getTurn(), piece.getId());
-						
-						//Traversing along the possible moves, if one of them is not -1 then it is not a draw
+
 						for (int i = 0; i < possibleMoves.length; i++) {
 							if (possibleMoves[i] != -1) {
 								isDraw = false;
@@ -598,22 +584,6 @@ public class CheckersGUI {
 			GameOver();
 		}
 
-	}
-	
-	private int CheckRowIndex(Node piece) {
-		if (GridPane.getRowIndex(piece) == null) {
-			return 0;
-		} else {
-			return GridPane.getRowIndex(piece);
-		}
-	}
-
-	private int CheckColIndex(Node piece) {
-		if (GridPane.getColumnIndex(piece) == null) {
-			return 0;
-		} else {
-			return GridPane.getColumnIndex(piece);
-		}
 	}
 
 }
