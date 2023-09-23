@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="621.0" prefWidth="485.0" style="-fx-background-color: #005293;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sprint1_prod.LoginController">
+   <children>
+      <RadioButton fx:id="radioBtn_online" layoutX="333.0" layoutY="118.0" mnemonicParsing="false" onAction="#selectMode" selected="true" text="Online" textFill="#fecb00">
+         <toggleGroup>
+            <ToggleGroup fx:id="mode" />
+         </toggleGroup>
+      </RadioButton>
+      <RadioButton fx:id="radioBtn_multiplayer" layoutX="179.0" layoutY="118.0" mnemonicParsing="false" onAction="#selectMode" selected="true" text="Multiplayer" textFill="#fecb00" toggleGroup="$mode" />
+      <Button fx:id="btn_register" layoutX="331.0" layoutY="586.0" mnemonicParsing="false" onAction="#actionOnClickRegisterButton" text="Register" />
+      <ImageView fitHeight="88.0" fitWidth="179.0" layoutX="219.0" layoutY="475.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../../../Checkers_login/asset/checkers_logo.png" />
+         </image>
+      </ImageView>
+      <Label layoutX="196.0" layoutY="590.0" text="Don't have an account?" textFill="#fecb00" />
+      <VBox alignment="CENTER" layoutY="-2.0" prefHeight="627.0" prefWidth="100.0" style="-fx-background-color: #fecb00;">
+         <children>
+            <Label fx:id="lbl_checkers" alignment="BOTTOM_LEFT" contentDisplay="CENTER" prefHeight="465.0" prefWidth="30.0" text="CHECKERS" textAlignment="CENTER" textFill="#005293" wrapText="true">
+               <font>
+                  <Font name="System Bold" size="38.0" />
+               </font>
+            </Label>
+         </children></VBox>
+      <AnchorPane id="loginPane" fx:id="loginPane" layoutX="100.0" layoutY="156.0" prefHeight="290.0" prefWidth="385.0">
+         <children>
+            <TextField fx:id="txtBox_Player1" layoutX="21.0" layoutY="25.0" promptText="Player 1" />
+            <Button fx:id="btn_login1" layoutX="284.0" layoutY="62.0" mnemonicParsing="false" onAction="#actionOnClickLoginButton1" text="Login" />
+            <Button fx:id="btn_login2" layoutX="287.0" layoutY="144.0" mnemonicParsing="false" onAction="#actionOnClickLoginButton2" text="Login" />
+            <TextField fx:id="txtBox_Player2" layoutX="21.0" layoutY="106.0" promptText="Player 2" />
+            <Button fx:id="btn_Play" disable="true" layoutX="107.0" layoutY="185.0" mnemonicParsing="false" onAction="#actionOnClickLoginButton" prefHeight="46.0" prefWidth="159.0" text="Play" underline="true">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Button>
+            <PasswordField fx:id="txtBox_Password1" layoutX="200.0" layoutY="25.0" promptText="Password" />
+            <PasswordField fx:id="txtBox_Password2" layoutX="200.0" layoutY="106.0" promptText="Password" />
+         </children>
+      </AnchorPane>
+      <AnchorPane id="registerPane" fx:id="registerPane" layoutX="99.0" layoutY="14.0" prefHeight="448.0" prefWidth="377.0" visible="false">
+         <children>
+            <TextField fx:id="txtBox_username" layoutX="112.0" layoutY="157.0" promptText="Enter username" />
+            <TextField fx:id="txtBox_fname" layoutX="38.0" layoutY="213.0" promptText="Enter first name" />
+            <TextField fx:id="txtBox_lname" layoutX="188.0" layoutY="213.0" promptText="Enter last name" />
+            <TextField fx:id="txtBox_password" layoutX="37.0" layoutY="262.0" promptText="Enter password" />
+            <TextField fx:id="txtBox_repassword" layoutX="188.0" layoutY="262.0" promptText="Re-enter password" />
+            <TextField fx:id="txtBox_email" layoutX="37.0" layoutY="310.0" promptText="Email address" />
+            <TextField fx:id="txtBox_phoneNumber" layoutX="188.0" layoutY="310.0" promptText="Phone number" />
+            <Button fx:id="btn_register" layoutX="37.0" layoutY="367.0" mnemonicParsing="false" onAction="#registerNewAccount" prefHeight="51.0" prefWidth="297.0" style="-fx-background-color: #fecb00;" text="Register" textFill="#005293" />
+            <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="123.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../asset/add_image.png" />
+               </image>
+            </ImageView>
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>
